@@ -29,8 +29,12 @@ class ApiCva {
           Map data = jsonDecode(json);
           var datos;
           if (data['articulos'] != null) {
-            //Validación de que la respuesta si contenga productos
-            datos = data['articulos']['item'];
+            // Obtener la lista de productos
+            List productos = data['articulos']['item'];
+            // Ordenar la lista por existencia de forma descendente
+            productos.sort(
+                (a, b) => int.parse(b['ExsTotal']) - int.parse(a['ExsTotal']));
+            datos = productos;
           } else {
             datos = 'No Existe';
           }

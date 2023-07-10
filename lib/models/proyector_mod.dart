@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ProyectorModelo {
+  String observaciones;
   String np;
   String marca;
   String modelo;
@@ -33,7 +34,8 @@ class ProyectorModelo {
   String garantia;
 
   ProyectorModelo(
-      {this.np = '',
+      {this.observaciones = '',
+      this.np = '',
       this.marca = '',
       this.modelo = '',
       this.sisProy = '',
@@ -62,6 +64,7 @@ class ProyectorModelo {
       this.garantia = ''});
 
   Map<String, String> toJson() => {
+        'observaciones': observaciones,
         'np': np,
         'marca': marca,
         'modelo': modelo,
@@ -91,18 +94,12 @@ class ProyectorModelo {
         'garantia': garantia,
       };
 
-  static Future<dynamic> guardar(
-      List<Map> proyectores, String titulo, String mejor) async {
+  static Future<dynamic> guardar(List<Map> proyectors, String titulo) async {
     try {
-      String enc = jsonEncode(proyectores);
+      String enc = jsonEncode(proyectors);
       final respuesta = await http.Client().post(
-        Uri.https('www.apibuscador.tecnologiaintegrada.mx',
-            '/public/api/gproyector', {
-          'nombre': '$titulo',
-          'mejor': '$mejor',
-          'comparador': 'proyectores',
-          'datos': '$enc'
-        }),
+        Uri.http('127.0.0.1:8000', '/api/gproyector',
+            {'nombre': '$titulo', 'comparador': 'proyectors', 'datos': '$enc'}),
       );
       String status = respuesta.body;
       return status;
@@ -113,6 +110,7 @@ class ProyectorModelo {
 
   static Map<String, String> fromJson(Map datos) {
     return {
+      'observaciones': datos['observaciones'],
       'np': datos['np'],
       'marca': datos['marca'],
       'modelo': datos['modelo'],
@@ -145,10 +143,8 @@ class ProyectorModelo {
 
   static Future<dynamic> listaproyector(String busq) async {
     try {
-      final respuesta = await http.Client().get(Uri.https(
-          'www.apibuscador.tecnologiaintegrada.mx',
-          '/public/api/lproyector',
-          {'text': '$busq'}));
+      final respuesta = await http.Client().get(
+          Uri.http('127.0.0.1:8000', '/api/lproyector', {'text': '$busq'}));
       String json = respuesta.body;
       var respuestaJson = jsonDecode(json);
       if (respuestaJson == null || respuestaJson.length == 0) {
@@ -166,6 +162,7 @@ class ProyectorModelo {
   }
 
   List<String> columnas = [
+    'Observaciones',
     'NP',
     'Marca',
     'Modelo',

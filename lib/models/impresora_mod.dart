@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ImpresoraModelo {
+  String observaciones;
   String np;
   String marca;
   String modelo;
@@ -26,7 +27,8 @@ class ImpresoraModelo {
   String garantia;
 
   ImpresoraModelo(
-      {this.np = '',
+      {this.observaciones = '',
+      this.np = '',
       this.marca = '',
       this.modelo = '',
       this.color = '',
@@ -48,6 +50,7 @@ class ImpresoraModelo {
       this.garantia = ''});
 
   Map<String, String> toJson() => {
+        'observaciones': observaciones,
         'np': np,
         'marca': marca,
         'modelo': modelo,
@@ -71,6 +74,7 @@ class ImpresoraModelo {
       };
 
   List<String> columnas = [
+    'Observaciones',
     'NP',
     'Marca',
     'Modelo',
@@ -93,18 +97,12 @@ class ImpresoraModelo {
     'Garantía'
   ];
 
-  static Future<dynamic> guardar(
-      List<Map> impresoras, String titulo, String mejor) async {
+  static Future<dynamic> guardar(List<Map> impresoras, String titulo) async {
     try {
       String enc = jsonEncode(impresoras);
       final respuesta = await http.Client().post(
-        Uri.https('www.apibuscador.tecnologiaintegrada.mx',
-            '/public/api/gimpresora', {
-          'nombre': '$titulo',
-          'mejor': '$mejor',
-          'comparador': 'impresoras',
-          'datos': '$enc'
-        }),
+        Uri.http('127.0.0.1:8000', '/api/gimpresora',
+            {'nombre': '$titulo', 'comparador': 'impresoras', 'datos': '$enc'}),
       );
       String status = respuesta.body;
       return status;
@@ -115,10 +113,8 @@ class ImpresoraModelo {
 
   static Future<dynamic> listaimpresora(String busq) async {
     try {
-      final respuesta = await http.Client().get(Uri.https(
-          'www.apibuscador.tecnologiaintegrada.mx',
-          '/public/api/limpresora',
-          {'text': '$busq'}));
+      final respuesta = await http.Client().get(
+          Uri.http('127.0.0.1:8000', '/api/limpresora', {'text': '$busq'}));
       String json = respuesta.body;
       var respuestaJson = jsonDecode(json);
       if (respuestaJson == null || respuestaJson.length == 0) {
@@ -137,6 +133,7 @@ class ImpresoraModelo {
 
   static Map<String, String> fromJson(Map datos) {
     return {
+      'observaciones': datos['observaciones'],
       'np': datos['np'],
       'marca': datos['marca'],
       'modelo': datos['modelo'],

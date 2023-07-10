@@ -9,6 +9,7 @@ import 'package:ati/models/pantalla_mod.dart';
 import 'package:ati/models/pc_mod.dart';
 import 'package:ati/models/proyector_mod.dart';
 import 'package:ati/models/scanner_mod.dart';
+import 'package:ati/models/interactiva_mod.dart';
 import 'package:http/http.dart' as http;
 
 class ComparativoModelo {
@@ -20,14 +21,12 @@ class ComparativoModelo {
 
   static Future<dynamic> listaComparativos(String busq) async {
     try {
-      final respuesta = await http.Client().get(Uri.https(
-          'www.apibuscador.tecnologiaintegrada.mx',
-          '/public/api/viewcomparativos',
-          {'text': '$busq'}));
+      final respuesta = await http.Client().get(Uri.http(
+          '127.0.0.1:8000', '/api/viewcomparativos', {'text': '$busq'}));
       String respbody = respuesta.body.toString();
       List datos = jsonDecode(respbody);
       return datos;
-    } on Exception catch (e) {
+    } catch (e) {
       return 'Error';
     }
   }
@@ -35,18 +34,18 @@ class ComparativoModelo {
   Map<String, dynamic> columnas = {
     'impresoras': ImpresoraModelo().columnas,
     'laptops': LaptopModelo().columnas,
-    'monitores': MonitorModelo().columnas,
+    'monitors': MonitorModelo().columnas,
     'pantallas': PantallaModelo().columnas,
     'pcs': PcModelo().columnas,
-    'proyectores': ProyectorModelo().columnas,
-    'scanners': ScannerModelo().columnas
+    'proyectors': ProyectorModelo().columnas,
+    'scanners': ScannerModelo().columnas,
+    'interactivas': InteractivaModelo().columnas
   };
 
   static Future<List<Map>> comparativoPdf(String tabla, String id) async {
     try {
       final respuesta = await http.Client().get(
-        Uri.https('www.apibuscador.tecnologiaintegrada.mx',
-            '/public/api/comp$tabla', {
+        Uri.http('127.0.0.1:8000', '/api/comp$tabla', {
           'id': '$id',
         }),
       );
@@ -57,7 +56,7 @@ class ComparativoModelo {
         return e;
       }));
       return resp;
-    } on Exception catch (e) {
+    } catch (e) {
       return [];
     }
   }

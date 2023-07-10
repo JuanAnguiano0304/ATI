@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ScannerModelo {
+  String observaciones;
   String np;
   String marca;
   String modelo;
@@ -31,6 +32,7 @@ class ScannerModelo {
   String garantia;
 
   ScannerModelo({
+    this.observaciones = '',
     this.np = '',
     this.marca = '',
     this.modelo = '',
@@ -59,6 +61,7 @@ class ScannerModelo {
   });
 
   Map<String, String> toJson() => {
+        'observaciones': observaciones,
         'np': np,
         'marca': marca,
         'modelo': modelo,
@@ -86,18 +89,12 @@ class ScannerModelo {
         'garantia': garantia,
       };
 
-  static Future<dynamic> guardar(
-      List<Map> scanners, String titulo, String mejor) async {
+  static Future<dynamic> guardar(List<Map> scanners, String titulo) async {
     try {
       String enc = jsonEncode(scanners);
       final respuesta = await http.Client().post(
-        Uri.https(
-            'www.apibuscador.tecnologiaintegrada.mx', '/public/api/gscanner', {
-          'nombre': '$titulo',
-          'mejor': '$mejor',
-          'comparador': 'scanners',
-          'datos': '$enc'
-        }),
+        Uri.http('127.0.0.1:8000', '/api/gscanner',
+            {'nombre': '$titulo', 'comparador': 'scanners', 'datos': '$enc'}),
       );
       String status = respuesta.body;
       print(status);
@@ -109,10 +106,8 @@ class ScannerModelo {
 
   static Future<dynamic> listascanner(String busq) async {
     try {
-      final respuesta = await http.Client().get(Uri.https(
-          'www.apibuscador.tecnologiaintegrada.mx',
-          '/public/api/lscanner',
-          {'text': '$busq'}));
+      final respuesta = await http.Client()
+          .get(Uri.http('127.0.0.1:8000', '/api/lscanner', {'text': '$busq'}));
       String json = respuesta.body;
       var respuestaJson = jsonDecode(json);
       if (respuestaJson == null || respuestaJson.length == 0) {
@@ -131,6 +126,7 @@ class ScannerModelo {
 
   static Map<String, String> fromJson(Map datos) {
     return {
+      'observaciones': datos['observaciones'],
       'np': datos['np'],
       'marca': datos['marca'],
       'modelo': datos['modelo'],
@@ -160,6 +156,7 @@ class ScannerModelo {
   }
 
   List<String> columnas = [
+    'Observaciones',
     'NP',
     'Marca',
     'Modelo',

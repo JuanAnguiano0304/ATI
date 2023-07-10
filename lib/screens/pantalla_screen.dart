@@ -15,7 +15,6 @@ class PantallaScreen extends StatefulWidget {
 class _PantallaScreenState extends State<PantallaScreen> {
   final formPantalla = GlobalKey<FormState>();
   String? titulo;
-  String? mejor;
   List<Map<String, String>> compPantalla = [];
   List<DataRow> row = [];
   String busq = '';
@@ -24,6 +23,13 @@ class _PantallaScreenState extends State<PantallaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Verificar si hay exactamente dos filas y agregar una tercera vacía
+    if (row.length == 2) {
+      compPantalla.add(PantallaModelo().toJson());
+      row.add(Funcionalidades().filas(i, compPantalla));
+      i++;
+    }
+
     return Scaffold(
       body: Form(
         key: formPantalla,
@@ -107,34 +113,6 @@ class _PantallaScreenState extends State<PantallaScreen> {
                     ),
                   ],
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-                  width: 700,
-                  child: TextFormField(
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Debe poner la pantalla que sea superior';
-                      }
-                      return null;
-                    },
-                    onSaved: (newValue) {
-                      mejor = newValue;
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Pantalla superior',
-                      labelText: 'Pantalla superior',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(
-                          color: Colors.redAccent,
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
             Expanded(child: tablaScanner())
@@ -144,20 +122,15 @@ class _PantallaScreenState extends State<PantallaScreen> {
     );
   }
 
-  void refresh() {
-    setState(() {});
-  }
-
   void guardar(bool drive) async {
     if (formPantalla.currentState!.validate() && compPantalla.length > 1) {
       formPantalla.currentState!.save();
       if (db == 0) {
+        String guardar = await PantallaModelo.guardar(compPantalla, titulo!);
         db = 1;
-        String guardar =
-            await PantallaModelo.guardar(compPantalla, titulo!, mejor!);
         if (guardar == 'Completado') {
           // ignore: use_build_context_synchronously
-          FPDF().pdf(context, drive, titulo!, mejor!, PantallaModelo().columnas,
+          FPDF().pdf(context, drive, titulo!, "", PantallaModelo().columnas,
               compPantalla);
         } else {
           db = 0;
@@ -165,7 +138,7 @@ class _PantallaScreenState extends State<PantallaScreen> {
           MsgScaffold().mensaje(context, guardar, Colors.red, null);
         }
       } else {
-        FPDF().pdf(context, drive, titulo!, mejor!, PantallaModelo().columnas,
+        FPDF().pdf(context, drive, titulo!, "", PantallaModelo().columnas,
             compPantalla);
       }
     }
@@ -187,6 +160,10 @@ class _PantallaScreenState extends State<PantallaScreen> {
       }).toList(),
       rows: row,
     );
+  }
+
+  void refresh() {
+    setState(() {});
   }
 
   Future<void> _showMyDialog() async {

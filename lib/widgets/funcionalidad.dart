@@ -50,7 +50,8 @@ class Funcionalidades {
       'Monitores',
       'Impresoras',
       'Scanners',
-      'Pantallas'
+      'Pantallas',
+      'Interactivas'
     ];
   }
 

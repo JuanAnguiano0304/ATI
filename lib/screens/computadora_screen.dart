@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings
-
 import 'package:ati/models/pc_mod.dart';
 import 'package:ati/widgets/fpdf.dart';
 import 'package:ati/widgets/funcionalidad.dart';
@@ -8,7 +6,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
 class Computadora extends StatefulWidget {
-  const Computadora({super.key});
+  const Computadora({Key? key}) : super(key: key);
 
   @override
   State<Computadora> createState() => _ComputadoraState();
@@ -19,12 +17,19 @@ class _ComputadoraState extends State<Computadora> {
   List<Map<String, String>> compPC = [];
   List<DataRow> row = [];
   String? titulo;
-  String? mejor;
   String busq = '';
   int db = 0;
   int i = 0;
+
   @override
   Widget build(BuildContext context) {
+    // Verificar si hay exactamente dos filas y agregar una tercera vacía
+    if (row.length == 2) {
+      compPC.add(PcModelo().toJson());
+      row.add(Funcionalidades().filas(i, compPC));
+      i++;
+    }
+
     return Scaffold(
       body: Form(
         key: formComputadora,
@@ -44,7 +49,7 @@ class _ComputadoraState extends State<Computadora> {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (value) {
                             if (value!.isEmpty) {
-                              return 'Escriba un titulo';
+                              return 'Escriba un título';
                             }
                             return null;
                           },
@@ -108,34 +113,6 @@ class _ComputadoraState extends State<Computadora> {
                     ),
                   ],
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-                  width: 700,
-                  child: TextFormField(
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Debe poner el desktop que sea superior';
-                      }
-                      return null;
-                    },
-                    onSaved: (newValue) {
-                      mejor = newValue;
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Desktop superior',
-                      labelText: 'Desktop superior',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(
-                          color: Colors.redAccent,
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
             Expanded(child: tablaComputadora())
@@ -149,38 +126,36 @@ class _ComputadoraState extends State<Computadora> {
     if (formComputadora.currentState!.validate() && compPC.length > 1) {
       formComputadora.currentState!.save();
       if (db == 0) {
-        String guardar = await PcModelo.guardar(compPC, titulo!, mejor!);
+        String guardar = await PcModelo.guardar(compPC, titulo!);
         db = 1;
         if (guardar == 'Completado') {
-          // ignore: use_build_context_synchronously
-          FPDF().pdf(
-              context, drive, titulo!, mejor!, PcModelo().columnas, compPC);
+          FPDF().pdf(context, drive, titulo!, "", PcModelo().columnas, compPC);
         } else {
           db = 0;
-          // ignore: use_build_context_synchronously
           MsgScaffold().mensaje(context, guardar, Colors.red, null);
         }
       } else {
-        FPDF()
-            .pdf(context, drive, titulo!, mejor!, PcModelo().columnas, compPC);
+        FPDF().pdf(context, drive, titulo!, "", PcModelo().columnas, compPC);
       }
     }
   }
 
   Widget tablaComputadora() {
     return DataTable2(
-        columnSpacing: 16,
-        dataRowHeight: 180,
-        minWidth: 3400,
-        border: TableBorder.all(),
-        columns: PcModelo().columnas.map((e) {
-          return DataColumn2(
-              label: Text(
+      columnSpacing: 16,
+      dataRowHeight: 180,
+      minWidth: 3400,
+      border: TableBorder.all(),
+      columns: PcModelo().columnas.map((e) {
+        return DataColumn2(
+          label: Text(
             e,
             softWrap: true,
-          ));
-        }).toList(),
-        rows: row);
+          ),
+        );
+      }).toList(),
+      rows: row,
+    );
   }
 
   void refresh() {

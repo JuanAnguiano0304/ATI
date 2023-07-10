@@ -36,6 +36,7 @@ class _ListaCvaState extends State<ListaCva> {
   @override
   Widget build(BuildContext context) {
     datos = widget.datos;
+    datos.sort((a, b) => int.parse(b['ExsTotal']) - int.parse(a['ExsTotal']));
     if (pag == 0) {
       for (var i = 0; i < datos.length; i += chunkSize) {
         chunks.add(datos.sublist(

@@ -11,6 +11,16 @@ import 'dart:js' as js;
 import 'package:flutter/material.dart';
 import 'package:flutter_gradient_colors/flutter_gradient_colors.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:ati/models/syscomApi.dart';
+import 'package:ati/models/pchApi.dart';
+import 'package:ati/models/exelApi.dart';
+import 'package:ati/models/glomaApi.dart';
+import 'package:ati/models/dataApi.dart';
+import 'package:ati/models/intcomexApi.dart';
+import 'package:ati/models/buscadorMayorista.dart';
+
+import 'package:ati/screens/formularioLicitacion.dart';
+import 'package:ati/models/formularioLicitaciones.dart';
 
 import 'view_link/marcas_screen.dart';
 
@@ -25,35 +35,98 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Widget? selectedSearchScreen;
+  bool showSelectedSearchScreen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicialmente se muestra el buscador general
+    selectedSearchScreen = _buildSelectedSearchScreen();
+  }
+
+  void resetSelectedSearchScreen() {
+    setState(() {
+      showSelectedSearchScreen = false;
+      selectedSearchScreen = _buildSelectedSearchScreen();
+    });
+  }
+
+  void showSelectedSearchScreenTab() {
+    setState(() {
+      showSelectedSearchScreen = true;
+    });
+  }
+
+  Widget _buildSelectedSearchScreen() {
+    return Column(
+      children: [
+        _buildListTile('Buscador CVA', const BuscadorProveedor(), Icons.search),
+        _buildListTile('Buscador CT', const CTonline(), Icons.search),
+        _buildListTile('Buscador Syscom', SyscomBuscadorScreen(), Icons.search),
+        _buildListTile('Buscador PCH', PchController(), Icons.search),
+        _buildListTile('Buscador EXEL', ExelApi(), Icons.search),
+        _buildListTile('Buscador DataComponents', DataScreen(), Icons.search),
+        _buildListTile('Buscador G-Loma', GLomaApi(), Icons.search),
+        _buildListTile('Buscador INTCOMEX', IntcomexScreen(), Icons.search),
+        _buildListTile('Buscador INGRAM', DataScreen(), Icons.search),
+      ],
+    );
+  }
+
+  Widget _buildListTile(String title, Widget screen, IconData icon) {
+    return Card(
+      elevation: 2.0,
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onTap: () {
+          setState(() {
+            showSelectedSearchScreen = true;
+            selectedSearchScreen = screen;
+          });
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     return DefaultTabController(
       initialIndex: 0,
-      length: 6,
+      length: 7,
       child: Scaffold(
         appBar: AppBar(
           actions: [
             Row(
               children: [
-                Text(widget.user!,
-                    softWrap: true,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        backgroundColor: Color.fromARGB(0, 202, 202, 235))),
+                Text(
+                  widget.user!,
+                  softWrap: true,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    backgroundColor: Color.fromARGB(0, 202, 202, 235),
+                    fontFamily: 'Roboto',
+                  ),
+                ),
                 IconButton(
-                    tooltip: 'Cerrar sesión',
-                    splashRadius: 20,
-                    onPressed: () {
-                      UserData.cleanToken();
-                      UserData.cleanDisplayName();
-                      Utils().signInOut();
-                      setState(() {
-                        Navigator.of(context)
-                            .pushNamedAndRemoveUntil('/', (route) => false);
-                      });
-                    },
-                    icon: const Icon(Icons.logout))
+                  tooltip: 'Cerrar sesión',
+                  splashRadius: 20,
+                  onPressed: () {
+                    UserData.cleanToken();
+                    UserData.cleanDisplayName();
+                    Utils().signInOut();
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/', (route) => false);
+                  },
+                  icon: const Icon(Icons.logout),
+                ),
               ],
             )
           ],
@@ -66,10 +139,27 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          title: Text(
-            media.width >= 439 ? 'ATI Tecnología Integrada' : 'ATI',
+          title: Row(
+            children: [
+              ClipRRect(
+                borderRadius:
+                    BorderRadius.circular(15), // Redondear la imagen del logo
+                child: Image.network(
+                  'https://i.postimg.cc/GmvdqH3W/326133312-681398487015865-904546752635516144-n.jpg',
+                  width: 30,
+                  height: 30,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                media.width >= 439 ? 'ATI Tecnología Integrada' : 'ATI',
+                style: TextStyle(
+                  fontFamily: 'Roboto', // Utilizar una fuente moderna
+                ),
+              ),
+            ],
           ),
-          centerTitle: media.width < 600 ? false : true,
+          centerTitle: media.width >= 600,
           toolbarHeight: 30,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),
@@ -77,47 +167,61 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 40,
               child: TabBar(
                 indicatorColor: Colors.red,
+                onTap: (index) {
+                  if (index == 1) {
+                    resetSelectedSearchScreen();
+                  }
+                },
                 tabs: [
                   Tab(
-                    // icon: Icon(Icons.search),
-                    text: media.width >= 810
-                        ? 'Buscador general'
-                        : media.width >= 455
-                            ? 'Buscador'
-                            : 'Busc.',
+                    child: Text(
+                      media.width >= 810 ? 'Buscador general' : 'Buscador',
+                    ),
                   ),
                   Tab(
-                    // icon: Icon(Icons.saved_search),
-                    text: media.width >= 810 ? 'Buscador CVA' : 'CVA',
+                    text: 'Buscadores Mayoristas',
                   ),
                   Tab(
-                    // icon: Icon(Icons.saved_search),
-                    text: media.width >= 810 ? 'Buscador CT' : 'CT',
+                    text: 'Buscador general mayoristas',
                   ),
                   Tab(
-                    // icon: Icon(Icons.description),
-                    text: media.width >= 810 ? 'Carpeta compartida' : 'Drive',
+                    child: Text(
+                      media.width >= 810 ? 'Carpeta compartida' : 'Drive',
+                    ),
                   ),
                   Tab(
-                    // icon: Icon(Icons.table_chart),
-                    text: media.width >= 810 ? 'Tablas comparativas' : 'Tablas',
+                    child: Text(
+                      media.width >= 810 ? 'Tablas comparativas' : 'Tablas',
+                    ),
                   ),
                   Tab(
-                    // icon: Icon(Icons.storage),
-                    text: media.width >= 810 ? 'Bodega de links' : 'Links',
-                  )
+                    text: 'Licitaciones',
+                  ),
+                  Tab(
+                    child: Text(
+                      media.width >= 810 ? 'Bodega de links' : 'Links',
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
         ),
         body: TabBarView(
+          physics: NeverScrollableScrollPhysics(),
           children: [
             const BuscadorScreen(),
-            const BuscadorProveedor(),
-            const CTonline(),
+            showSelectedSearchScreen
+                ? Column(
+                    children: [
+                      Expanded(child: selectedSearchScreen!),
+                    ],
+                  )
+                : selectedSearchScreen!,
+            CombinedSearch(),
             const DriveScreen(),
             const ComparadorScreen(),
+            RegistroTable(),
             MarcasScreen(name: widget.user!, email: widget.email!),
           ],
         ),

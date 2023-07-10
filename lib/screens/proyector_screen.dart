@@ -17,14 +17,21 @@ class Proyector extends StatefulWidget {
 class _ProyectorState extends State<Proyector> {
   final formProyector = GlobalKey<FormState>();
   String? titulo;
-  String? mejor;
   List<Map<String, String>> compProy = [];
   List<DataRow> row = [];
   int db = 0;
   String busq = '';
   int i = 0;
+
   @override
   Widget build(BuildContext context) {
+    // Verificar si hay exactamente dos filas y agregar una tercera vacía
+    if (row.length == 2) {
+      compProy.add(ProyectorModelo().toJson());
+      row.add(Funcionalidades().filas(i, compProy));
+      i++;
+    }
+
     return Scaffold(
       body: Form(
         key: formProyector,
@@ -108,34 +115,6 @@ class _ProyectorState extends State<Proyector> {
                     ),
                   ],
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-                  width: 700,
-                  child: TextFormField(
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Debe poner el proyector que sea superior';
-                      }
-                      return null;
-                    },
-                    onSaved: (newValue) {
-                      mejor = newValue;
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Proyector superior',
-                      labelText: 'Proyector superior',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(
-                          color: Colors.redAccent,
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
             Flexible(child: tablaProyector())
@@ -145,27 +124,24 @@ class _ProyectorState extends State<Proyector> {
     );
   }
 
-  void refresh() {
-    setState(() {});
-  }
-
   void guardar(bool drive) async {
     if (formProyector.currentState!.validate() && compProy.length > 1) {
       formProyector.currentState!.save();
       if (db == 0) {
+        String guardar = await ProyectorModelo.guardar(compProy, titulo!);
         db = 1;
-        String guardar =
-            await ProyectorModelo.guardar(compProy, titulo!, mejor!);
         if (guardar == 'Completado') {
-          FPDF().pdf(context, drive, titulo!, mejor!,
-              ProyectorModelo().columnas, compProy);
+          // ignore: use_build_context_synchronously
+          FPDF().pdf(context, drive, titulo!, "", ProyectorModelo().columnas,
+              compProy);
         } else {
           db = 0;
+          // ignore: use_build_context_synchronously
           MsgScaffold().mensaje(context, guardar, Colors.red, null);
         }
       } else {
-        FPDF().pdf(context, drive, titulo!, mejor!, ProyectorModelo().columnas,
-            compProy);
+        FPDF().pdf(
+            context, drive, titulo!, "", ProyectorModelo().columnas, compProy);
       }
     }
   }
@@ -185,6 +161,10 @@ class _ProyectorState extends State<Proyector> {
       }).toList(),
       rows: row,
     );
+  }
+
+  void refresh() {
+    setState(() {});
   }
 
   Future<void> _showMyDialog() async {

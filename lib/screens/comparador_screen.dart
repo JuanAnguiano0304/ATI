@@ -3,6 +3,7 @@ import 'package:ati/screens/computadora_screen.dart';
 import 'package:ati/screens/impresora_screen.dart';
 import 'package:ati/screens/laptop_screen.dart';
 import 'package:ati/screens/monitor_screen.dart';
+import 'package:ati/screens/interactiva_screen.dart';
 import 'package:ati/screens/pantalla_screen.dart';
 import 'package:ati/screens/proyector_screen.dart';
 import 'package:ati/screens/scanner_screen.dart';
@@ -41,6 +42,9 @@ class _ComparadorScreenState extends State<ComparadorScreen> {
     }
     if (selectedValue == 'Pantallas') {
       return const PantallaScreen();
+    }
+    if (selectedValue == 'Interactivas') {
+      return const InteractivaScreen();
     } else {
       return const ComparativoScreen();
     }

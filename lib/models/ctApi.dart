@@ -37,6 +37,7 @@ class ApiCt {
             'www.apibuscador.tecnologiaintegrada.mx', '/public/api/ctonline'));
         var datos = json.decode(respuesta.body);
         List<Map> lista = [];
+
         if (filter == 'Desc') {
           for (var i = 0; i < datos.length; i++) {
             String datbusq = datos[i]['descripcion_corta'];
@@ -53,14 +54,17 @@ class ApiCt {
             }
           }
         }
+
+        // Ordenar la lista por existencias en orden descendente
+        lista.sort(
+            (a, b) => int.parse(b['exis']).compareTo(int.parse(a['exis'])));
+
         return lista;
       } catch (e) {
         return 'error';
       }
     } else {
-      {
-        return 'Sin búsqueda';
-      }
+      return 'Sin búsqueda';
     }
   }
 }

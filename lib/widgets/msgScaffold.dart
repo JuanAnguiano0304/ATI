@@ -10,7 +10,7 @@ class MsgScaffold {
       content: Text(mensaje),
       backgroundColor: color,
       behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.only(bottom: 40),
+      margin: (width != null) ? null : const EdgeInsets.only(bottom: 40),
     ));
   }
 }

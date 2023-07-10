@@ -17,14 +17,20 @@ class LaptopScreen extends StatefulWidget {
 class _LaptopScreenState extends State<LaptopScreen> {
   final formLaptop = GlobalKey<FormState>();
   String? titulo;
-  String? mejor;
   List<Map<String, String>> compLaptop = [];
   List<DataRow> row = [];
   String busq = '';
   int db = 0;
   int i = 0;
+
   @override
   Widget build(BuildContext context) {
+    // Verificar si hay exactamente dos filas y agregar una tercera vacía
+    if (row.length == 2) {
+      compLaptop.add(LaptopModelo().toJson());
+      row.add(Funcionalidades().filas(i, compLaptop));
+      i++;
+    }
     return Scaffold(
       body: Form(
         key: formLaptop,
@@ -108,34 +114,6 @@ class _LaptopScreenState extends State<LaptopScreen> {
                     ),
                   ],
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-                  width: 700,
-                  child: TextFormField(
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Debe poner la laptop que sea superior';
-                      }
-                      return null;
-                    },
-                    onSaved: (newValue) {
-                      mejor = newValue;
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Laptop superior',
-                      labelText: 'Laptop superior',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(
-                          color: Colors.redAccent,
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
             Expanded(child: tablaLaptop())
@@ -149,27 +127,22 @@ class _LaptopScreenState extends State<LaptopScreen> {
     if (formLaptop.currentState!.validate() && compLaptop.length > 1) {
       formLaptop.currentState!.save();
       if (db == 0) {
+        String guardar = await LaptopModelo.guardar(compLaptop, titulo!);
         db = 1;
-        String guardar =
-            await LaptopModelo.guardar(compLaptop, titulo!, mejor!);
         if (guardar == 'Completado') {
           // ignore: use_build_context_synchronously
-          FPDF().pdf(context, drive, titulo!, mejor!, LaptopModelo().columnas,
-              compLaptop);
+          FPDF().pdf(
+              context, drive, titulo!, "", LaptopModelo().columnas, compLaptop);
         } else {
           db = 0;
           // ignore: use_build_context_synchronously
           MsgScaffold().mensaje(context, guardar, Colors.red, null);
         }
       } else {
-        FPDF().pdf(context, drive, titulo!, mejor!, LaptopModelo().columnas,
-            compLaptop);
+        FPDF().pdf(
+            context, drive, titulo!, "", LaptopModelo().columnas, compLaptop);
       }
     }
-  }
-
-  void refresh() {
-    setState(() {});
   }
 
   Widget tablaLaptop() {
@@ -186,6 +159,10 @@ class _LaptopScreenState extends State<LaptopScreen> {
           ));
         }).toList(),
         rows: row);
+  }
+
+  void refresh() {
+    setState(() {});
   }
 
   Future<void> _showMyDialog() async {

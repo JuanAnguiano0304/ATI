@@ -18,13 +18,20 @@ class _ImpresoraScreenState extends State<ImpresoraScreen> {
   List<Map<String, String>> compImpr = [];
   final formImpresora = GlobalKey<FormState>();
   String? titulo;
-  String? mejor;
   List<DataRow> row = [];
   int db = 0;
   String busq = '';
   int i = 0;
+
   @override
   Widget build(BuildContext context) {
+    // Verificar si hay exactamente dos filas y agregar una tercera vacía
+    if (row.length == 2) {
+      compImpr.add(ImpresoraModelo().toJson());
+      row.add(Funcionalidades().filas(i, compImpr));
+      i++;
+    }
+
     return Scaffold(
       body: Form(
         key: formImpresora,
@@ -108,34 +115,6 @@ class _ImpresoraScreenState extends State<ImpresoraScreen> {
                     ),
                   ],
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-                  width: 700,
-                  child: TextFormField(
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Debe poner el desktop que sea superior';
-                      }
-                      return null;
-                    },
-                    onSaved: (newValue) {
-                      mejor = newValue;
-                    },
-                    decoration: const InputDecoration(
-                      hintText: 'Impresora superior',
-                      labelText: 'Impresora superior',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        borderSide: BorderSide(
-                          color: Colors.redAccent,
-                          width: 3,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
             Expanded(child: tablaImpresora()),
@@ -149,22 +128,20 @@ class _ImpresoraScreenState extends State<ImpresoraScreen> {
     if (formImpresora.currentState!.validate() && compImpr.length > 1) {
       formImpresora.currentState!.save();
       if (db == 0) {
+        String guardar = await ImpresoraModelo.guardar(compImpr, titulo!);
         db = 1;
-        String guardar =
-            await ImpresoraModelo.guardar(compImpr, titulo!, mejor!);
         if (guardar == 'Completado') {
           // ignore: use_build_context_synchronously
-          FPDF().pdf(context, drive, titulo!, mejor!,
-              ImpresoraModelo().columnas, compImpr);
+          FPDF().pdf(context, drive, titulo!, "", ImpresoraModelo().columnas,
+              compImpr);
         } else {
           db = 0;
-
           // ignore: use_build_context_synchronously
           MsgScaffold().mensaje(context, guardar, Colors.red, null);
         }
       } else {
-        FPDF().pdf(context, drive, titulo!, mejor!, ImpresoraModelo().columnas,
-            compImpr);
+        FPDF().pdf(
+            context, drive, titulo!, "", ImpresoraModelo().columnas, compImpr);
       }
     }
   }

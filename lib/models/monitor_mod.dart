@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class MonitorModelo {
+  String observaciones;
   String np;
   String marca;
   String modelo;
@@ -15,7 +16,7 @@ class MonitorModelo {
   String aVisualizacion;
   String tRespuesta;
   String colores;
-  String fActualizacion;
+  String factualizacion;
   String brillo;
   String contrasteE;
   String gColores;
@@ -38,7 +39,8 @@ class MonitorModelo {
   String garantia;
 
   MonitorModelo(
-      {this.np = '',
+      {this.observaciones = '',
+      this.np = '',
       this.marca = '',
       this.modelo = '',
       this.tPantalla = '',
@@ -49,7 +51,7 @@ class MonitorModelo {
       this.aVisualizacion = '',
       this.tRespuesta = '',
       this.colores = '',
-      this.fActualizacion = '',
+      this.factualizacion = '',
       this.brillo = '',
       this.contrasteE = '',
       this.gColores = '',
@@ -72,6 +74,7 @@ class MonitorModelo {
       this.garantia = ''});
 
   Map<String, String> toJson() => {
+        'observaciones': observaciones,
         'np': np,
         'marca': marca,
         'modelo': modelo,
@@ -83,7 +86,7 @@ class MonitorModelo {
         'aVisualizacion': aVisualizacion,
         'tRespuesta': tRespuesta,
         'colores': colores,
-        'fActualizacion': fActualizacion,
+        'factualizacion': factualizacion,
         'brillo': brillo,
         'contrasteE': contrasteE,
         'gColores': gColores,
@@ -106,18 +109,12 @@ class MonitorModelo {
         'garantia': garantia
       };
 
-  static Future<dynamic> guardar(
-      List<Map> monitores, String titulo, String mejor) async {
+  static Future<dynamic> guardar(List<Map> monitors, String titulo) async {
     try {
-      String enc = jsonEncode(monitores);
+      String enc = jsonEncode(monitors);
       final respuesta = await http.Client().post(
-        Uri.https(
-            'www.apibuscador.tecnologiaintegrada.mx', '/public/api/gmonitor', {
-          'nombre': '$titulo',
-          'mejor': '$mejor',
-          'comparador': 'monitores',
-          'datos': '$enc'
-        }),
+        Uri.http('127.0.0.1:8000', '/api/gmonitor',
+            {'nombre': '$titulo', 'comparador': 'monitors', 'datos': '$enc'}),
       );
       String status = respuesta.body;
       return status;
@@ -128,6 +125,7 @@ class MonitorModelo {
 
   static Map<String, String> fromJson(Map datos) {
     return {
+      'observaciones': datos['observaciones'],
       'np': datos['np'],
       'marca': datos['marca'],
       'modelo': datos['modelo'],
@@ -139,7 +137,7 @@ class MonitorModelo {
       'aVisualizacion': datos['avisualizacion'],
       'tRespuesta': datos['trespuesta'],
       'colores': datos['colores'],
-      'fActualizacion': datos['factualizacion'],
+      'factualizacion': datos['factualizacion'],
       'brillo': datos['brillo'],
       'contrasteE': datos['contraste'],
       'gColores': datos['gcolores'],
@@ -165,10 +163,8 @@ class MonitorModelo {
 
   static Future<dynamic> listamonitor(String busq) async {
     try {
-      final respuesta = await http.Client().get(Uri.https(
-          'www.apibuscador.tecnologiaintegrada.mx',
-          '/public/api/lmonitor',
-          {'text': '$busq'}));
+      final respuesta = await http.Client()
+          .get(Uri.http('127.0.0.1:8000', '/api/lmonitor', {'text': '$busq'}));
       String json = respuesta.body;
       var respuestaJson = jsonDecode(json);
       if (respuestaJson == null || respuestaJson.length == 0) {
@@ -186,6 +182,7 @@ class MonitorModelo {
   }
 
   List<String> columnas = [
+    'Observaciones',
     'NP',
     'Marca',
     'Modelo',

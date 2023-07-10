@@ -115,4 +115,6 @@ class Utils {
       return e;
     }
   }
+
+  deletePDF(String titulo) {}
 }

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class PantallaModelo {
+  String observaciones;
   String np;
   String marca;
   String modelo;
@@ -30,6 +31,7 @@ class PantallaModelo {
   String garantia;
 
   PantallaModelo({
+    this.observaciones = '',
     this.np = '',
     this.marca = '',
     this.modelo = '',
@@ -57,6 +59,7 @@ class PantallaModelo {
   });
 
   Map<String, String> toJson() => {
+        'observaciones': observaciones,
         'np': np,
         'marca': marca,
         'modelo': modelo,
@@ -83,18 +86,12 @@ class PantallaModelo {
         'garantia': garantia
       };
 
-  static Future<dynamic> guardar(
-      List<Map> pantallas, String titulo, String mejor) async {
+  static Future<dynamic> guardar(List<Map> pantallas, String titulo) async {
     try {
       String enc = jsonEncode(pantallas);
       final respuesta = await http.Client().post(
-        Uri.https(
-            'www.apibuscador.tecnologiaintegrada.mx', '/public/api/gpantalla', {
-          'nombre': '$titulo',
-          'mejor': '$mejor',
-          'comparador': 'pantallas',
-          'datos': '$enc'
-        }),
+        Uri.http('127.0.0.1:8000', '/api/gpantalla',
+            {'nombre': '$titulo', 'comparador': 'pantallas', 'datos': '$enc'}),
       );
       String status = respuesta.body;
       return status;
@@ -105,6 +102,7 @@ class PantallaModelo {
 
   static Map<String, String> fromJson(Map datos) {
     return {
+      'observaciones': datos['observaciones'],
       'np': datos['np'],
       'marca': datos['marca'],
       'modelo': datos['modelo'],
@@ -134,10 +132,8 @@ class PantallaModelo {
 
   static Future<dynamic> listapantalla(String busq) async {
     try {
-      final respuesta = await http.Client().get(Uri.https(
-          'www.apibuscador.tecnologiaintegrada.mx',
-          '/public/api/lpantalla',
-          {'text': '$busq'}));
+      final respuesta = await http.Client()
+          .get(Uri.http('127.0.0.1:8000', '/api/lpantalla', {'text': '$busq'}));
       String json = respuesta.body;
       var respuestaJson = jsonDecode(json);
       if (respuestaJson == null || respuestaJson.length == 0) {
@@ -155,6 +151,7 @@ class PantallaModelo {
   }
 
   List<String> columnas = [
+    'Observaciones',
     'NP',
     'Marca',
     'Modelo',

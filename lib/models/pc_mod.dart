@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class PcModelo {
+  String observaciones;
   String np;
   String marca;
   String modelo;
@@ -29,7 +30,8 @@ class PcModelo {
   String garantia;
 
   PcModelo(
-      {this.np = '',
+      {this.observaciones = '',
+      this.np = '',
       this.marca = '',
       this.modelo = '',
       this.procesador = '',
@@ -54,6 +56,7 @@ class PcModelo {
       this.garantia = ''});
 
   Map<String, String> toJson() => {
+        "observaciones": observaciones,
         "np": np,
         'marca': marca,
         'modelo': modelo,
@@ -79,17 +82,12 @@ class PcModelo {
         'garantia': garantia
       };
 
-  static Future<dynamic> guardar(
-      List<Map> pcs, String titulo, String mejor) async {
+  static Future<dynamic> guardar(List<Map> pcs, String titulo) async {
     try {
       String enc = jsonEncode(pcs);
       final respuesta = await http.Client().post(
-        Uri.https('www.apibuscador.tecnologiaintegrada.mx', '/public/api/gpc', {
-          'nombre': '$titulo',
-          'mejor': '$mejor',
-          'comparador': 'pcs',
-          'datos': '$enc'
-        }),
+        Uri.http('127.0.0.1:8000', '/api/gpc',
+            {'nombre': '$titulo', 'comparador': 'pcs', 'datos': '$enc'}),
       );
       String status = respuesta.body;
       return status;
@@ -100,10 +98,9 @@ class PcModelo {
 
   static Future<dynamic> listaPc(String busq) async {
     try {
-      final respuesta = await http.Client().get(Uri.https(
-          'www.apibuscador.tecnologiaintegrada.mx',
-          '/public/api/lpcs',
-          {'text': '$busq'}));
+      final respuesta = await http.Client()
+          .get(Uri.http('127.0.0.1:8000', '/api/lpcs', {'text': '$busq'}));
+
       String json = respuesta.body;
       var respuestaJson = jsonDecode(json);
       if (respuestaJson == null || respuestaJson.length == 0) {
@@ -122,6 +119,7 @@ class PcModelo {
 
   static Map<String, String> fromJson(Map datos) {
     return {
+      'observaciones': datos['observaciones'],
       'np': datos['np'],
       'marca': datos['marca'],
       'modelo': datos['modelo'],
@@ -149,6 +147,7 @@ class PcModelo {
   }
 
   List<String> columnas = [
+    'Observaciones',
     'NP',
     'Marca',
     'Modelo',

@@ -1,166 +1,164 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:ati/models/scanner_mod.dart';
+import 'package:ati/models/interactiva_mod.dart';
 import 'package:ati/widgets/fpdf.dart';
 import 'package:ati/widgets/funcionalidad.dart';
 import 'package:ati/widgets/msgScaffold.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 
-class ScannerScreen extends StatefulWidget {
-  const ScannerScreen({super.key});
+class InteractivaScreen extends StatefulWidget {
+  const InteractivaScreen({Key? key}) : super(key: key);
 
   @override
-  State<ScannerScreen> createState() => _ScannerScreenState();
+  State<InteractivaScreen> createState() => _InteractivaScreenState();
 }
 
-class _ScannerScreenState extends State<ScannerScreen> {
-  final formScanner = GlobalKey<FormState>();
+class _InteractivaScreenState extends State<InteractivaScreen> {
+  final formInteractiva = GlobalKey<FormState>();
   String? titulo;
-  List<Map<String, String>> compScanner = [];
+  List<Map<String, String>> compInteractiva = [];
   List<DataRow> row = [];
+  String busq = '';
   int db = 0;
   int i = 0;
-  String busq = '';
 
   @override
   Widget build(BuildContext context) {
     // Verificar si hay exactamente dos filas y agregar una tercera vacía
     if (row.length == 2) {
-      compScanner.add(ScannerModelo().toJson());
-      row.add(Funcionalidades().filas(i, compScanner));
+      compInteractiva.add(InteractivaModelo().toJson());
+      row.add(Funcionalidades().filas(i, compInteractiva));
       i++;
     }
-
     return Scaffold(
       body: Form(
-        key: formScanner,
-        child: Column(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.only(
-                            left: 10, right: 10, bottom: 10),
-                        width: 700,
-                        child: TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Escriba un titulo';
-                            }
-                            return null;
-                          },
-                          onSaved: (newValue) {
-                            titulo = newValue;
-                          },
-                          decoration: const InputDecoration(
-                            hintText: 'Nombre de la Comparativa',
-                            labelText: 'Nombre de la Comparativa',
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20)),
-                              borderSide: BorderSide(
-                                color: Colors.redAccent,
-                                width: 3,
+          key: formInteractiva,
+          child: Column(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.only(
+                              left: 10, right: 10, bottom: 10),
+                          width: 700,
+                          child: TextFormField(
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Escriba un titulo';
+                              }
+                              return null;
+                            },
+                            onSaved: (newValue) {
+                              titulo = newValue;
+                            },
+                            decoration: const InputDecoration(
+                              hintText: 'Nombre de la Comparativa',
+                              labelText: 'Nombre de la Comparativa',
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)),
+                                borderSide: BorderSide(
+                                  color: Colors.redAccent,
+                                  width: 3,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      padding: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 10),
-                      onPressed: () {
-                        compScanner.add(ScannerModelo().toJson());
-                        row.add(Funcionalidades().filas(i, compScanner));
-                        setState(() {
-                          i++;
-                        });
-                      },
-                      icon: const Icon(Icons.add),
-                      tooltip: 'Agregar fila nueva',
-                    ),
-                    IconButton(
-                      onPressed: () => _showMyDialog(),
-                      icon: const Icon(Icons.add_box),
-                      tooltip: 'Agregar fila con un producto',
-                      padding: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 10),
-                    ),
-                    IconButton(
-                      tooltip: 'Subir a Drive',
-                      padding: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 10),
-                      onPressed: () => guardar(true),
-                      icon: const Icon(
-                        Icons.add_to_drive,
-                        color: Colors.green,
+                      IconButton(
+                        padding: const EdgeInsets.only(
+                            left: 10, right: 10, bottom: 10),
+                        onPressed: () {
+                          compInteractiva.add(InteractivaModelo().toJson());
+                          row.add(Funcionalidades().filas(i, compInteractiva));
+                          setState(() {
+                            i++;
+                          });
+                        },
+                        icon: const Icon(Icons.add),
+                        tooltip: 'Agregar fila nueva',
                       ),
-                    ),
-                    IconButton(
-                      tooltip: 'Descargar en PDF',
-                      padding: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 10),
-                      onPressed: () => guardar(false),
-                      icon: const Icon(
-                        Icons.picture_as_pdf,
-                        color: Colors.red,
+                      IconButton(
+                        onPressed: () => _showMyDialog(),
+                        icon: const Icon(Icons.add_box),
+                        tooltip: 'Agregar fila con un producto',
+                        padding: const EdgeInsets.only(
+                            left: 10, right: 10, bottom: 10),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Expanded(child: tablaScanner())
-          ],
-        ),
-      ),
+                      IconButton(
+                        tooltip: 'Subir a Drive',
+                        padding: const EdgeInsets.only(
+                            left: 10, right: 10, bottom: 10),
+                        onPressed: () => guardar(true),
+                        icon: const Icon(
+                          Icons.add_to_drive,
+                          color: Colors.green,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Descargar en PDF',
+                        padding: const EdgeInsets.only(
+                            left: 10, right: 10, bottom: 10),
+                        onPressed: () => guardar(false),
+                        icon: const Icon(
+                          Icons.picture_as_pdf,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Expanded(child: tablaInteractiva())
+            ],
+          )),
     );
   }
 
   void guardar(bool drive) async {
-    if (formScanner.currentState!.validate() && compScanner.length > 1) {
-      formScanner.currentState!.save();
+    if (formInteractiva.currentState!.validate() &&
+        compInteractiva.length > 1) {
+      formInteractiva.currentState!.save();
       if (db == 0) {
-        String guardar = await ScannerModelo.guardar(compScanner, titulo!);
+        String guardar =
+            await InteractivaModelo.guardar(compInteractiva, titulo!);
         db = 1;
         if (guardar == 'Completado') {
-          FPDF().pdf(context, drive, titulo!, "", ScannerModelo().columnas,
-              compScanner);
+          // ignore: use_build_context_synchronously
+          FPDF().pdf(context, drive, titulo!, "", InteractivaModelo().columnas,
+              compInteractiva);
         } else {
           db = 0;
+          // ignore: use_build_context_synchronously
           MsgScaffold().mensaje(context, guardar, Colors.red, null);
         }
       } else {
-        FPDF().pdf(
-            context, drive, titulo!, "", ScannerModelo().columnas, compScanner);
+        FPDF().pdf(context, drive, titulo!, "", InteractivaModelo().columnas,
+            compInteractiva);
       }
     }
   }
 
-  Widget tablaScanner() {
+  Widget tablaInteractiva() {
     return DataTable2(
-      //Creación de la tabla
-      columnSpacing: 20, //Espacio de la columna
-      dataRowHeight: 180, //Tamaño de las filas
-      minWidth: 3900, //Tamaño de mínimo de las columnas
-      border: TableBorder.all(), //Bordes para la tabla
-      columns: ScannerModelo().columnas.map((e) {
+      columnSpacing: 20,
+      dataRowHeight: 180,
+      minWidth: 7800,
+      border: TableBorder.all(),
+      columns: InteractivaModelo().columnas.map((e) {
         return DataColumn2(
-          //Creación de las columnas
-          label: Text(
-            e,
-            softWrap: true,
-          ),
-        );
+            label: Text(
+          e,
+          softWrap: true,
+        ));
       }).toList(),
-      rows: row, //filas de acuerdo a una lista
+      rows: row,
     );
   }
 
@@ -209,7 +207,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     ],
                   ),
                   FutureBuilder(
-                    future: ScannerModelo.listascanner(busq),
+                    future: InteractivaModelo.listainteractiva(busq),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState.name == 'waiting') {
                         return SizedBox(
@@ -240,20 +238,16 @@ class _ScannerScreenState extends State<ScannerScreen> {
                                   itemBuilder: (context, index) {
                                     return InkWell(
                                       onTap: () {
-                                        compScanner.add(datos[index]);
+                                        compInteractiva.add(datos[index]);
                                         row.add(Funcionalidades()
-                                            .filas(i, compScanner));
+                                            .filas(i, compInteractiva));
                                         Navigator.pop(context);
                                         i++;
                                         refresh();
-                                        // setState(() {
-                                        //   Navigator.pop(context);
-                                        //   i++;
-                                        // });
                                       },
                                       child: Card(
                                         child: ListTile(
-                                          leading: const Icon(Icons.scanner),
+                                          leading: const Icon(Icons.monitor),
                                           title: Text(datos[index]['marca'] +
                                               ' ' +
                                               datos[index]['modelo']),

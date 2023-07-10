@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class LaptopModelo {
+  String observaciones;
   String np;
   String marca;
   String modelo;
@@ -35,6 +36,7 @@ class LaptopModelo {
   String garantia;
 
   LaptopModelo({
+    this.observaciones = '',
     this.np = '',
     this.marca = '',
     this.modelo = '',
@@ -67,6 +69,7 @@ class LaptopModelo {
   });
 
   Map<String, String> toJson() => {
+        'observaciones': observaciones,
         'np': np,
         'marca': marca,
         'modelo': modelo,
@@ -93,23 +96,17 @@ class LaptopModelo {
         'puertos': puertos,
         'seguridad': seguridad,
         'huella': huella,
-        'cerficados': certificados,
+        'certificados': certificados,
         'pruebMil': pruebMil,
         'garantia': garantia
       };
 
-  static Future<dynamic> guardar(
-      List<Map> laptops, String titulo, String mejor) async {
+  static Future<dynamic> guardar(List<Map> laptops, String titulo) async {
     try {
       String enc = jsonEncode(laptops);
       final respuesta = await http.Client().post(
-        Uri.https(
-            'www.apibuscador.tecnologiaintegrada.mx', '/public/api/glaptop', {
-          'nombre': '$titulo',
-          'mejor': '$mejor',
-          'comparador': 'laptops',
-          'datos': '$enc'
-        }),
+        Uri.http('127.0.0.1:8000', '/api/glaptop',
+            {'nombre': '$titulo', 'comparador': 'laptops', 'datos': '$enc'}),
       );
       String status = respuesta.body;
       return status;
@@ -120,6 +117,7 @@ class LaptopModelo {
 
   static Map<String, String> fromJson(Map datos) {
     return {
+      'observaciones': datos['observaciones'],
       'np': datos['np'],
       'marca': datos['marca'],
       'modelo': datos['modelo'],
@@ -154,10 +152,8 @@ class LaptopModelo {
 
   static Future<dynamic> listalaptop(String busq) async {
     try {
-      final respuesta = await http.Client().get(Uri.https(
-          'www.apibuscador.tecnologiaintegrada.mx',
-          '/public/api/llaptop',
-          {'text': '$busq'}));
+      final respuesta = await http.Client()
+          .get(Uri.http('127.0.0.1:8000', '/api/llaptop', {'text': '$busq'}));
       String json = respuesta.body;
       var respuestaJson = jsonDecode(json);
       if (respuestaJson == null || respuestaJson.length == 0) {
@@ -175,6 +171,7 @@ class LaptopModelo {
   }
 
   List<String> columnas = [
+    'Observaciones',
     'NP',
     'Marca',
     'Modelo',
